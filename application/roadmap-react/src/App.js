@@ -26,6 +26,7 @@ class App extends Component {
 
   componentDidMount() {
     this.loadData();
+    window.setInterval(this.loadData.bind(this), 60000);
   }
 
   handlePreviousWeek() {
