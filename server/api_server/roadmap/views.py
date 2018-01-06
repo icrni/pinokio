@@ -24,7 +24,7 @@ class Days(View):
         from_ts = datetime.fromtimestamp(int(kwargs['from_ts']))
         to_ts = datetime.fromtimestamp(int(kwargs['to_ts']))
 
-        workers = Worker.objects.all()
+        workers = Worker.objects.filter(is_active=True)
 
         issues = Issues.objects.filter(
             Q(start_date__isnull=False, assignee__isnull=False),
