@@ -45,11 +45,11 @@ class Command(BaseCommand):
 
                 iss, created = Issues.objects.update_or_create(
                     key=issue.key,
-                    assignee=issue.fields.assignee,
-                    status=issue.fields.status,
-                    start_date=issue.fields.customfield_11403,
-                    end_date=issue.fields.customfield_11404,
                     defaults={
+                        'assignee': issue.fields.assignee,
+                        'status': issue.fields.status,
+                        'start_date': issue.fields.customfield_11403,
+                        'end_date': issue.fields.customfield_11404,
                         'name': issue.fields.summary,
                         'issue_type': issue.fields.issuetype,
                         'epic_name': epic,

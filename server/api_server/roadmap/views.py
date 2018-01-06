@@ -31,7 +31,7 @@ class Days(View):
             Q(start_date__lte=from_ts, end_date__gte=from_ts) |
             Q(start_date__lte=to_ts, end_date__gte=to_ts) |
             Q(start_date__gte=from_ts, end_date__lte=to_ts)
-        )
+        ).exclude(issue_type='Epic')
         response = {}
 
         for worker in workers:

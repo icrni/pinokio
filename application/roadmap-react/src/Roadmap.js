@@ -34,11 +34,14 @@ class Issue extends Component {
             case 'In Progress':
                 var color = 'khaki';
                 break;
+            case 'Code review':
+                var color = '#D6BF86';
+                break;
             case 'Ready to ship':
-                var color = 'mediumslateblue';
+                var color = '#A6AF7A';
                 break;
             case 'Done':
-                var color = 'mediumseagreen';
+                var color = '#669966';
                 break;
             case 'Ready':
                 var color = 'steelblue';
