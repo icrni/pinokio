@@ -1,0 +1,7 @@
+Django==1.11.7
+djangorestframework==3.7.3
+psycopg2
+wheel
+jira
+django-cors-headers
+arrow

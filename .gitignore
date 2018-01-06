@@ -1,0 +1,4 @@
+postgres
+.idea
+*.pyc
+server/api_server/api_server/prod.py
