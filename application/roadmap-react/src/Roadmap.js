@@ -28,10 +28,10 @@ class WorkerLabel extends Component {
 class Issue extends Component {
     render() {
         switch(this.props.data.status) {
-            case 'ToDo':
+            case 'To Do':
                 var color = 'grey';
                 break;
-            case 'In Progress':
+            case 'In progress':
                 var color = 'khaki';
                 break;
             case 'Code review':
