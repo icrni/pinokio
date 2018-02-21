@@ -1,5 +1,5 @@
 from datetime import datetime, timedelta
-from itertools import chain
+from collections import deque
 from django.db.models import Sum, Q
 from rest_framework import serializers, viewsets
 from django.http import JsonResponse
@@ -79,35 +79,54 @@ class Days(View):
         )
 
 
-def get_worktime_time(issue):
-
-    for linkedissue in Issues.objects.filter(linked_issues=issue):
-        worklogs = get_worktime_time(linkedissue)
-
-    worklog = Worklogs.objects.filter(issue=issue)
-    return list(chain(worklogs, worklog))
-
-
 class LabelCosts(View):
 
     def get(self, request, **kwargs):
+        workers = {}
+        for wr in Worker.objects.all():
+            workers[wr.name] = wr.cost
+
         result = {}
+        costs = {}
         for label in PIDLabel.objects.all():
-            result[label.name] = list()
+            result[label.name] = []
             for issue in Issues.objects.filter(
                     linked_issues__in=Issues.objects.filter(project='PID', labels=label)
             ):
-                if issue.issue_type == 'Epic':
-                    result[label.name] = result[label.name] + list(Worklogs.objects.filter(
-                        issue__in=Issues.objects.filter(epic_link=issue.key)
-                    ))
-                elif issue.issue_type == 'Story':
-                    result[label.name] = result[label.name] + list(Worklogs.objects.filter(
-                        issue=issue
-                    ))
+                try:
+                    if issue.issue_type == 'Epic':
+                        result[label.name] = result[label.name] + [
+                            (w.start, (w.timeSpentSeconds/3600) * workers[issue.assignee])
+                            for w in Worklogs.objects.filter(
+                                issue__in=Issues.objects.filter(epic_link=issue.key)
+                            )]
+                    elif issue.issue_type == 'Story':
+                        result[label.name] = result[label.name] + [
+                            (w.start, (w.timeSpentSeconds/3600) * workers[issue.assignee])
+                            for w in Worklogs.objects.filter(
+                                issue=issue
+                            )]
+                except:
+                    pass
 
-        print(result)
+            data = deque((date, cost) for date, cost in sorted(result[label.name], key=lambda t:t[0]))
+
+            grouped = {}
+            while data:
+                week = data[0][0] - timedelta(days=(data[0][0].isocalendar()[2] - 1))
+                temp = [data.popleft()]
+                while data and week.isocalendar()[:2] == data[0][0].isocalendar()[:2]:
+                    temp.append(data.popleft())
+
+                key = 'ISO week {}-W{:02}'.format(*week.isocalendar()[:2])
+                key += ' ({} - {})'.format(week.strftime('%Y-%m-%d'),
+                                           (week + timedelta(days=6)).strftime('%Y-%m-%d'))
+
+                grouped[key] = sum(t[1] for t in temp)
+
+            costs[label.name] = grouped
+
         return JsonResponse(
-            result,
+            costs,
             status=200
         )
