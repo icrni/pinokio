@@ -41,3 +41,15 @@ class Comment(models.Model):
     body = models.TextField()
     type = models.CharField(max_length=200, blank=True, null=True)
     created = models.DateField(blank=True, null=True)
+
+
+class PIDLabel(models.Model):
+    name = models.CharField(max_length=200)
+
+
+class PID(models.Model):
+    key = models.CharField(max_length=30)
+    name = models.CharField(max_length=200)
+    status = models.CharField(max_length=200, blank=True, null=True)
+    issue_type = models.CharField(max_length=200)
+    labels = models.ManyToManyField(PIDLabel)
