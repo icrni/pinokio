@@ -4,6 +4,7 @@ from django.db.models import Sum, Q
 from rest_framework import serializers, viewsets
 from django.http import JsonResponse
 from django.views.generic import View
+import arrow
 
 from .models import Issues, Worklogs, Worker, Comment, PIDLabel
 
@@ -129,4 +130,47 @@ class LabelCosts(View):
         return JsonResponse(
             costs,
             status=200
+        )
+
+
+class Costs(View):
+
+    def get(self, request, **kwargs):
+        workers = {}
+        for wr in Worker.objects.all():
+            workers[wr.name] = wr.cost
+
+        result = []
+        for label in PIDLabel.objects.all():
+            for PID in Issues.objects.filter(project='PID', labels=label):
+                for issue in Issues.objects.filter(
+                        linked_issues=PID
+                ):
+                    try:
+                        if issue.issue_type == 'Epic':
+                            result = result + [{
+                                'year': arrow.Arrow.fromdate(w.start).isocalendar()[0],
+                                'week': arrow.Arrow.fromdate(w.start).isocalendar()[1],
+                                'cost': round((w.timeSpentSeconds/3600) * workers[issue.assignee]),
+                                'PID': PID.key,
+                                'label': label.name
+                            } for w in Worklogs.objects.filter(
+                                    issue__in=Issues.objects.filter(epic_link=issue.key)
+                                )]
+                        elif issue.issue_type == 'Story':
+                            result = result + [{
+                                'year': arrow.Arrow.fromdate(w.start).isocalendar()[0],
+                                'week': arrow.Arrow.fromdate(w.start).isocalendar()[1],
+                                'cost': round((w.timeSpentSeconds / 3600) * workers[issue.assignee]),
+                                'PID': PID.key,
+                                'label': label.name
+                            } for w in Worklogs.objects.filter(
+                                    issue=issue
+                                )]
+                    except:
+                        pass
+        print(result)
+        return JsonResponse(
+            result,
+            status=200, safe=False
         )
