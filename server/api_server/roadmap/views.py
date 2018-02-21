@@ -1,10 +1,11 @@
 from datetime import datetime, timedelta
+from itertools import chain
 from django.db.models import Sum, Q
 from rest_framework import serializers, viewsets
 from django.http import JsonResponse
 from django.views.generic import View
 
-from .models import Issues, Worklogs, Worker, Comment
+from .models import Issues, Worklogs, Worker, Comment, PIDLabel
 
 
 class IssueSerializer(serializers.HyperlinkedModelSerializer):
@@ -74,5 +75,39 @@ class Days(View):
 
         return JsonResponse(
             response,
+            status=200
+        )
+
+
+def get_worktime_time(issue):
+
+    for linkedissue in Issues.objects.filter(linked_issues=issue):
+        worklogs = get_worktime_time(linkedissue)
+
+    worklog = Worklogs.objects.filter(issue=issue)
+    return list(chain(worklogs, worklog))
+
+
+class LabelCosts(View):
+
+    def get(self, request, **kwargs):
+        result = {}
+        for label in PIDLabel.objects.all():
+            result[label.name] = list()
+            for issue in Issues.objects.filter(
+                    linked_issues__in=Issues.objects.filter(project='PID', labels=label)
+            ):
+                if issue.issue_type == 'Epic':
+                    result[label.name] = result[label.name] + list(Worklogs.objects.filter(
+                        issue__in=Issues.objects.filter(epic_link=issue.key)
+                    ))
+                elif issue.issue_type == 'Story':
+                    result[label.name] = result[label.name] + list(Worklogs.objects.filter(
+                        issue=issue
+                    ))
+
+        print(result)
+        return JsonResponse(
+            result,
             status=200
         )
