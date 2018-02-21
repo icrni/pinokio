@@ -5,7 +5,7 @@ from django.conf import settings
 
 from jira import JIRA
 
-from roadmap.models import PID, PIDLabel
+from roadmap.models import Issues, PIDLabel
 
 class Command(BaseCommand):
     # Show this when the user types help
@@ -31,12 +31,13 @@ class Command(BaseCommand):
             for issue in issues:
                 print("Working on: {} {}".format(issue.key, issue.fields.summary))
 
-                iss, created = PID.objects.update_or_create(
+                iss, created = Issues.objects.update_or_create(
                     key=issue.key,
                     defaults={
                         'status': issue.fields.status,
                         'name': issue.fields.summary,
-                        'issue_type': issue.fields.issuetype
+                        'issue_type': issue.fields.issuetype,
+                        'project': 'PID'
                     }
                 )
                 if created:

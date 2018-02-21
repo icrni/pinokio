@@ -25,7 +25,7 @@ class Command(BaseCommand):
             issues = jira.search_issues(
                 jql_str=jql_str,
                 startAt=total,
-                fields='worklog,comment,issuelinks,summary,assignee,timespent,status,issuetype,customfield_10007,customfield_10008,customfield_11403,customfield_11404'
+                fields='issuelinks,worklog,comment,issuelinks,summary,assignee,timespent,status,issuetype,customfield_10007,customfield_10008,customfield_11403,customfield_11404'
             )
 
             for issue in issues:
@@ -87,6 +87,13 @@ class Command(BaseCommand):
                             'type': type
                         }
                     )
+
+                for lissue in issue.fields.issuelinks:
+                    try:
+                        llissue = Issues.objects.get(key=lissue.inwardIssue.key)
+                        iss.linked_issues.add(llissue)
+                    except:
+                        pass
 
                 # remotelinks = jira.remote_links(issue.key)
                 # for link in remotelinks:
