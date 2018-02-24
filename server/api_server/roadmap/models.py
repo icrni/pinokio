@@ -3,6 +3,7 @@ from django.db import models
 
 class PIDLabel(models.Model):
     name = models.CharField(max_length=200)
+    relevant = models.BooleanField(default=True)
 
 
 class Issues(models.Model):

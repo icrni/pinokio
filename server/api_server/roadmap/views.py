@@ -141,7 +141,7 @@ class Costs(View):
             workers[wr.name] = wr.cost
 
         result = []
-        for label in PIDLabel.objects.all():
+        for label in PIDLabel.objects.filter(relevant=True):
             for PID in Issues.objects.filter(project='PID', labels=label):
                 for issue in Issues.objects.filter(
                         linked_issues=PID

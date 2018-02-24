@@ -90,6 +90,12 @@ class Command(BaseCommand):
 
                 for lissue in issue.fields.issuelinks:
                     try:
+                        llissue = Issues.objects.get(key=lissue.outwardIssue.key)
+                        iss.linked_issues.add(llissue)
+                    except:
+                        pass
+
+                    try:
                         llissue = Issues.objects.get(key=lissue.inwardIssue.key)
                         iss.linked_issues.add(llissue)
                     except:
