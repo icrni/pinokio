@@ -169,6 +169,45 @@ class Costs(View):
                                 )]
                     except:
                         pass
+
+        return JsonResponse(
+            result,
+            status=200, safe=False
+        )
+
+
+class WeeklyCosts(View):
+
+    def get(self, request, **kwargs):
+        from_ts = datetime.fromtimestamp(int(kwargs['from_ts']))
+        to_ts = datetime.fromtimestamp(int(kwargs['to_ts']))
+
+        workers = {}
+        for wr in Worker.objects.all():
+            workers[wr.name] = wr.cost
+
+        result = []
+
+        for worklog in Worklogs.objects.filter(start__gte=from_ts, start__lte=to_ts):
+            issue = worklog.issue
+            if issue.linked_issues.count() > 0:
+                try:
+                    PID = issue.linked_issues.first()
+                except:
+                    PID = None
+            else:
+                try:
+                    PID = Issues.objects.get(key=issue.epic_link).linked_issues.first()
+                except:
+                    PID = None
+            pid_key = '-'
+            if PID:
+                pid_key = PID.key
+            result.append({
+                'total': worklog.timeSpentSeconds,
+                'PID': pid_key,
+                'Issue': issue.key
+            })
         print(result)
         return JsonResponse(
             result,
