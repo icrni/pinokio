@@ -12,5 +12,5 @@ urlpatterns = [
     url('^days/(?P<from_ts>[0-9]{10})/(?P<to_ts>[0-9]{10})/', Days.as_view(), name='days_view'),
     url('^labels/', LabelCosts.as_view(), name='label_costs_view'),
     url('^costs/', Costs.as_view(), name='costs_view'),
-    url('^weekcosts/', WeeklyCosts.as_view(), name='week_costs_view')
+    url('^weekcosts/(?P<from_ts>[0-9]{10})/(?P<to_ts>[0-9]{10})/', WeeklyCosts.as_view(), name='week_costs_view')
 ]

@@ -19,7 +19,7 @@ class ProjectCosts extends Component {
   }
 
   loadData() {
-    fetch('http://127.0.0.1:8000/roadmap/costs/')
+    fetch('http://192.168.88.201:8000/roadmap/costs/')
       .then(response => response.json())
       .then(data => this.setState({ labels: data}));
   }

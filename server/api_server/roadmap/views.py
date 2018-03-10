@@ -202,13 +202,16 @@ class WeeklyCosts(View):
                     PID = None
             pid_key = '-'
             if PID:
-                pid_key = PID.key
+                pid_key = "{} {}".format(PID.key, PID.name)
             result.append({
-                'total': worklog.timeSpentSeconds,
+                'day': worklog.start,
+                'worker': issue.assignee,
+                'total': worklog.timeSpentSeconds / 3600,
                 'PID': pid_key,
-                'Issue': issue.key
+                'issue': issue.key,
+                'cost': round((worklog.timeSpentSeconds/3600) * workers.get(issue.assignee, 0))
             })
-        print(result)
+
         return JsonResponse(
             result,
             status=200, safe=False
